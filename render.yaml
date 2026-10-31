@@ -4,8 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
-    releaseCommand: python manage.py migrate
-    startCommand: gunicorn digicow.wsgi:application
+    startCommand: python manage.py migrate --noinput && gunicorn digicow.wsgi:application
     healthCheckPath: /
     envVars:
       - key: DJANGO_DEBUG
