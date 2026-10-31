@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Contact · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container"><h1>Contact us</h1><p>Questions about trainings or products? Send us a message.</p></div></div>
+{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/form_fields.html" %}
+    <button class="btn" type="submit">Send message</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Products · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container"><h1>Farm products</h1><p>Orders are placed through our trainers during farmer trainings.</p></div></div>
+{% endblock %}
+{% block content %}
+{% for brand in brands %}
+  <section id="{{ brand.slug }}" style="margin-bottom:2rem">
+    <div class="card-head"><h2>{{ brand.name }}</h2></div>
+    {% if brand.description %}<p class="muted">{{ brand.description }}</p>{% endif %}
+    {% if brand.live_products %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Product</th><th>Pack size</th><th class="num">Price (KES)</th></tr></thead>
+          <tbody>
+            {% for product in brand.live_products %}
+              <tr>
+                <td><strong>{{ product.name }}</strong>{% if product.description %}<br><span class="muted small">{{ product.description }}</span>{% endif %}</td>
+                <td>{{ product.unit }}</td>
+                <td class="num">{{ product.price|floatformat:"0g" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">Products for {{ brand.name }} will be listed here soon.</p>
+    {% endif %}
+  </section>
+{% empty %}
+  <p class="muted">No brands have been added yet.</p>
+{% endfor %}
+{% endblock %}

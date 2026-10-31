@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit farmer{% else %}Add farmer{% endif %} · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container"><h1>{% if object %}Edit farmer{% else %}Add a farmer{% endif %}</h1></div></div>
+{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/form_fields.html" %}
+    <div class="btn-row">
+      <button class="btn" type="submit">Save farmer</button>
+      <a class="btn btn-outline" href="{% url 'training:farmer_list' %}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Digicow · Farmer training and farm products{% endblock %}
+{% block body %}
+<section class="hero">
+  <div class="container hero-inner">
+    <h1>Practical farm training across more than eight counties.</h1>
+    <p class="lead">Digicow sends trainers to farmers across Kenya, follows up with every farmer by phone, and makes it easy to order trusted farm products from Juanco, CKL, Greenlife and Asili.</p>
+    <div class="btn-row">
+      <a class="btn" href="{% url 'core:trainings' %}">See upcoming trainings</a>
+      <a class="btn btn-outline" href="{% url 'core:products' %}">Browse products</a>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="stats-strip">
+    <div class="card stat"><div class="num">{{ stats.counties }}</div><div class="label">Counties reached</div></div>
+  </div>
+</div>
+
+<section class="block">
+  <div class="container">
+    <h2>How Digicow works</h2>
+    <div class="grid cols-3">
+      <div class="card accent">
+        <div class="step-num">1</div>
+        <h3>We train</h3>
+        <p>Our coordinator sets the topics and our trainers travel to the county to teach farmers on the ground.</p>
+      </div>
+      <div class="card accent">
+        <div class="step-num">2</div>
+        <h3>We follow up</h3>
+        <p>Our Q&amp;A team calls farmers to confirm they attended, hear their feedback and collect their questions.</p>
+      </div>
+      <div class="card accent">
+        <div class="step-num">3</div>
+        <h3>We supply</h3>
+        <p>Farmers can order quality farm products through the trainer, and every order is tracked digitally until delivery.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block tinted">
+  <div class="container outreach-grid">
+    <div>
+      <span class="qa-page-kicker">How we reach farmers</span>
+      <h2>Advice that starts in the community</h2>
+      <p>Our field trainers meet farmers where they live and work, bringing practical learning closer to local communities across more than eight counties.</p>
+      <p>Training topics focus on useful farm practices. Trainers explain and discuss them in person, then our Q&amp;A team follows up by phone to hear what farmers learned, collect questions and pass feedback back to the team.</p>
+      <p>That follow-up helps us keep advice connected to farmers' real experiences—not just the training day.</p>
+    </div>
+    <div class="outreach-steps">
+      <div><span class="step-num">1</span><p><strong>Listen locally</strong><br>We learn what farmers are asking about and choose relevant training topics.</p></div>
+      <div><span class="step-num">2</span><p><strong>Teach practically</strong><br>Trainers meet groups in their counties and share clear, actionable guidance.</p></div>
+      <div><span class="step-num">3</span><p><strong>Follow through</strong><br>Our team calls trainees, answers questions and carries feedback forward.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block tinted">
+  <div class="container">
+    <div class="card-head"><h2>Our brands</h2><a class="btn btn-outline btn-sm" href="{% url 'core:products' %}">All products</a></div>
+    <div class="grid cols-4">
+      {% for brand in brands %}
+        <div class="card"><h3>{{ brand.name }}</h3>{% if brand.description %}<p class="muted small">{{ brand.description }}</p>{% endif %}</div>
+      {% empty %}
+        <p class="muted">Brands will appear here once they are added.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="container">
+    <div class="card-head"><h2>Next trainings</h2><a class="btn btn-outline btn-sm" href="{% url 'core:trainings' %}">See all</a></div>
+    {% if upcoming %}
+      <div class="grid cols-3">
+        {% for s in upcoming %}
+          <div class="card">
+            <span class="badge badge-warn">{{ s.date|date:"D j M Y" }}</span>
+            <h3 style="margin-top:.6rem">{{ s.topic.title }}</h3>
+            <p class="muted small">{{ s.county }} County · {{ s.venue }}<br>{{ s.start_time|time:"g:i A" }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">No trainings are scheduled right now. Please check back soon.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="block">
+  <div class="container">
+    <div class="card-head"><div><h2>Hear from our trainees</h2><p class="muted">Farmer experiences and feedback</p></div></div>
+    {% if farmer_reviews %}
+      <div class="grid cols-3 testimonial-grid">
+        {% for review in farmer_reviews %}
+          <article class="card testimonial-card">
+            <div class="testimonial-stars" aria-label="{{ review.rating }} out of 5 stars">{% for _ in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</div>
+            <blockquote>{{ review.comment }}</blockquote>
+            <p class="testimonial-author"><strong>Farmer, {{ review.attendance.session.county }}</strong><br><span>{{ review.attendance.session.topic.title }}</span></p>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="testimonial-empty">
+        <span class="testimonial-mark" aria-hidden="true">“</span>
+        <div><p>We’ll share trainee reviews here after they’re submitted and approved.</p>
+          {% if user.is_authenticated and user.is_farmer %}
+            <a class="btn btn-sm" href="{% url 'core:submit_review' %}">Write a review</a>
+          {% else %}
+            <p class="small">Have you attended a Digicow training? <a href="{% url 'accounts:farmer_login' %}?next={% url 'core:submit_review' %}">Sign in to leave a review</a>.</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+    {% if user.is_authenticated and user.is_farmer and farmer_reviews %}
+      <p class="testimonial-submit"><a class="btn btn-outline btn-sm" href="{% url 'core:submit_review' %}">Share your experience</a></p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="block tinted">
+  <div class="container join-community">
+    <div>
+      <span class="qa-page-kicker">Be part of the community</span>
+      <h2>Learn, ask questions and grow with Digicow</h2>
+      <p>Create a farmer account to keep your training details together, or sign in if you already have one.</p>
+    </div>
+    <div class="btn-row">
+      <a class="btn" href="{% url 'accounts:farmer_signup' %}">Sign up as a farmer</a>
+      <a class="btn btn-outline" href="{% url 'accounts:farmer_login' %}">Farmer sign in</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

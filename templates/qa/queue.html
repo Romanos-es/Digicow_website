@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Call queue · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container">
+  <span class="qa-page-kicker">Farmer follow-up</span>
+  <h1>Call queue</h1>
+  <p>Confirm training attendance and record farmer feedback.</p>
+</div></div>
+{% endblock %}
+{% block content %}
+<section class="qa-queue-summary" aria-label="Call queue summary">
+  <div>
+    <h2>Training follow-up</h2>
+    <p>Work through the farmers waiting for an attendance confirmation call.</p>
+  </div>
+  <div class="qa-queue-total">
+    <strong>{{ page_obj.paginator.count }}</strong>
+    <span>waiting for a call</span>
+  </div>
+</section>
+
+<form class="qa-table-toolbar" method="get">
+  <div class="filters">
+  <div><label for="county">County</label>
+    <select class="input" id="county" name="county">
+      <option value="">All counties</option>
+      {% for c in counties %}<option value="{{ c.pk }}" {% if c.pk|stringformat:"s" == selected_county %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select></div>
+  </div>
+  <label class="qa-search">Search queue
+    <input class="input" type="search" name="q" value="{{ search_query }}" placeholder="Farmer, phone, training…" aria-label="Search call queue">
+  </label>
+  <button class="btn btn-sm" type="submit">Apply filters</button>
+</form>
+<div class="qa-queue-grid">
+  {% for a in queue %}
+    <article class="qa-queue-card">
+      <header class="qa-queue-card-head">
+        <div>
+          <span class="qa-card-label">Farmer</span>
+          <h2>{{ a.farmer.full_name }}</h2>
+        </div>
+        {% if a.attempts %}
+          <span class="badge badge-warn">{{ a.attempts }} attempt{{ a.attempts|pluralize }}</span>
+        {% else %}
+          <span class="badge badge-muted">New call</span>
+        {% endif %}
+      </header>
+      <a class="qa-queue-phone" href="tel:{{ a.farmer.phone }}">{{ a.farmer.phone }}</a>
+      <div class="qa-queue-training">
+        <span class="qa-card-label">Training</span>
+        <strong>{{ a.session.topic.title }}</strong>
+      </div>
+      <dl class="qa-queue-details">
+        <div><dt>Date</dt><dd>{{ a.session.date|date:"j M Y" }}</dd></div>
+        <div><dt>County</dt><dd>{{ a.session.county }}</dd></div>
+        <div><dt>Venue</dt><dd>{{ a.session.venue }}</dd></div>
+        <div><dt>Trainer</dt><dd>{{ a.session.trainer.display_name|default:"-" }}</dd></div>
+      </dl>
+      <footer class="qa-queue-card-foot">
+        <span>{{ a.farmer.location|default:a.farmer.county }}</span>
+        <a class="btn btn-sm" href="{% url 'qa:call' a.pk %}">Log call</a>
+      </footer>
+    </article>
+  {% empty %}
+    <div class="qa-queue-empty">
+      <span class="qa-queue-empty-icon" aria-hidden="true">✓</span>
+      <h2>The queue is clear</h2>
+      <p>There is nobody left to call{% if selected_county or search_query %} with these filters{% endif %}.</p>
+      {% if selected_county or search_query %}<a class="btn btn-outline btn-sm" href="{% url 'qa:queue' %}">Clear filters</a>{% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% include "partials/pagination.html" %}
+{% endblock %}

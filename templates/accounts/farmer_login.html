@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Farmer sign in · Digicow{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card accent auth-card">
+    <span class="qa-page-kicker">Farmer community</span>
+    <h1>Farmer sign in</h1>
+    <p class="muted">Sign in to see your Digicow farmer account and training details.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="btn" type="submit" style="width:100%">Sign in</button>
+    </form>
+    <p class="farmer-auth-switch">New to Digicow? <a href="{% url 'accounts:farmer_signup' %}">Create a farmer account</a>.</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Register attendance · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container">
+  <h1>Register attendance</h1>
+  <p>{{ session.topic.title }} · {{ session.county }} · {{ session.date|date:"j M Y" }}</p>
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors.0 }}</div>{% endif %}
+
+    <div class="field {% if form.farmers.errors %}has-error{% endif %}">
+      <label>{{ form.farmers.label }}</label>
+      {% if form.farmers.field.queryset %}
+        <div class="checklist">{{ form.farmers }}</div>
+      {% else %}
+        <p class="muted small">No other farmers from {{ session.county }} County are on the system yet. Add them below.</p>
+      {% endif %}
+      {% for error in form.farmers.errors %}<p class="error">{{ error }}</p>{% endfor %}
+    </div>
+
+    <div class="field {% if form.new_farmers.errors %}has-error{% endif %}">
+      <label for="{{ form.new_farmers.id_for_label }}">{{ form.new_farmers.label }}</label>
+      {{ form.new_farmers }}
+      <p class="help">{{ form.new_farmers.help_text }}</p>
+      {% for error in form.new_farmers.errors %}<p class="error">{{ error }}</p>{% endfor %}
+    </div>
+
+    <div class="field {% if form.group_photo.errors %}has-error{% endif %}">
+      <label for="{{ form.group_photo.id_for_label }}">{{ form.group_photo.label }}</label>
+      {% if session.group_photo %}
+        <p class="small">Current photo: <a href="{% url 'qa:training_photo' session.pk %}" target="_blank" rel="noopener">View training group photo</a></p>
+      {% endif %}
+      {{ form.group_photo }}
+      <p class="help">{{ form.group_photo.help_text }}</p>
+      {% for error in form.group_photo.errors %}<p class="error">{{ error }}</p>{% endfor %}
+    </div>
+
+    <p class="muted small">Each registered farmer is added to the Q&amp;A team's call list once the session is completed.</p>
+    <div class="btn-row">
+      <button class="btn" type="submit">Save attendance</button>
+      <a class="btn btn-outline" href="{% url 'training:session_detail' session.pk %}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

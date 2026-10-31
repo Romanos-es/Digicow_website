@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}About · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container"><h1>About Digicow</h1><p>Practical training and follow-up for farmers across more than eight counties in Kenya.</p></div></div>
+{% endblock %}
+{% block content %}
+<div class="grid cols-3">
+  <div class="card accent"><h3>Field training</h3><p>Trainers are sent to counties to teach farmers on topics chosen by our training coordinator, so every session covers what farmers need most.</p></div>
+  <div class="card accent"><h3>Q&amp;A follow-up</h3><p>After each training, our Q&amp;A team phones farmers to confirm attendance, gather feedback and pass their questions back to the trainers.</p></div>
+  <div class="card accent"><h3>Digital orders</h3><p>Trainers record farm product orders on the Digicow system, where they are approved, tracked and delivered.</p></div>
+</div>
+<h2 style="margin-top:2rem">Brands we supply</h2>
+<div class="grid cols-4">
+  {% for brand in brands %}
+    <div class="card"><h3>{{ brand.name }}</h3>{% if brand.description %}<p class="muted small">{{ brand.description }}</p>{% endif %}</div>
+  {% endfor %}
+</div>
+<section class="about-join">
+  <div>
+    <span class="qa-page-kicker">Join the community</span>
+    <h2>Are you a farmer?</h2>
+    <p>Sign up to keep your Digicow training information together, or sign in to return to your account.</p>
+  </div>
+  <div class="btn-row">
+    <a class="btn" href="{% url 'accounts:farmer_signup' %}">Create a farmer account</a>
+    <a class="btn btn-outline" href="{% url 'accounts:farmer_login' %}">Sign in</a>
+  </div>
+</section>
+{% endblock %}

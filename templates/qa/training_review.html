@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Review {{ session.topic.title }} · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container">
+  <a class="qa-back-link" href="{% url 'qa:training_list' %}">← All trainer trainings</a>
+  <span class="qa-page-kicker">Training review · {{ session.trainer.display_name|default:"Trainer not assigned" }}</span>
+  <h1>{{ session.topic.title }}</h1>
+  <p>{{ session.county }} · {{ session.venue }} · {{ session.date|date:"l j F Y" }}</p>
+</div></div>
+{% endblock %}
+{% block content %}
+<section class="qa-review-overview">
+  <div class="qa-review-photo">
+    {% if session.group_photo %}
+      <a href="{% url 'qa:training_photo' session.pk %}" target="_blank" rel="noopener">
+        <img src="{% url 'qa:training_photo' session.pk %}" alt="Group photo for {{ session.topic.title }} training">
+      </a>
+    {% else %}
+      <div class="qa-review-photo-empty"><span aria-hidden="true">▧</span><strong>No group photo uploaded</strong></div>
+    {% endif %}
+  </div>
+  <div class="qa-review-overview-details">
+    <span class="qa-card-label">Training summary</span>
+    <h2>{{ session.topic.title }}</h2>
+    <dl class="qa-review-meta">
+      <div><dt>Trainer</dt><dd>{{ session.trainer.display_name|default:"Not assigned" }}</dd></div>
+      <div><dt>Date</dt><dd>{{ session.date|date:"j M Y" }}</dd></div>
+      <div><dt>Location</dt><dd>{{ session.county }} · {{ session.venue }}</dd></div>
+      <div><dt>Trainees</dt><dd>{{ attendances|length }}</dd></div>
+    </dl>
+    <div class="qa-review-stats">
+      <span class="badge badge-warn">{{ review_counts.pending }} pending</span>
+      <span class="badge badge-ok">{{ review_counts.approved }} approved</span>
+      <span class="badge badge-bad">{{ review_counts.rejected }} rejected</span>
+    </div>
+  </div>
+</section>
+
+<section class="qa-group-decision">
+  <div>
+    <span class="qa-card-label">Whole training</span>
+    <h2>Review all trainees together</h2>
+    <p>This applies the same decision and reason to every trainee in this training, replacing their current individual decisions.</p>
+  </div>
+  <form method="post" action="{% url 'qa:review_training_group' session.pk %}" class="qa-decision-form">
+    {% csrf_token %}
+    <fieldset class="qa-decision-options">
+      <legend>Decision</legend>
+      {% for radio in review_form.decision %}
+        <label class="qa-decision-option {% if radio.choice_value == 'rejected' %}is-reject{% endif %}">
+          {{ radio.tag }} {{ radio.choice_label }}
+        </label>
+      {% endfor %}
+    </fieldset>
+    <label class="qa-reason-label" for="group-review-reason">Reason <span aria-hidden="true">*</span></label>
+    <textarea class="input" id="group-review-reason" name="reason" rows="2" maxlength="1000" required placeholder="Explain why the whole training is approved or rejected"></textarea>
+    <button class="btn btn-sm" type="submit" data-confirm="Apply this decision and reason to every trainee in the training?">Apply to whole training</button>
+  </form>
+</section>
+
+<section class="qa-trainee-section">
+  <header class="qa-trainee-heading">
+    <div><span class="qa-card-label">Individual decisions</span><h2>Trainee list</h2></div>
+    <span>{{ attendances|length }} trainee{{ attendances|length|pluralize }}</span>
+  </header>
+  <div class="qa-trainee-list">
+    {% for attendance in attendances %}
+      <article class="qa-trainee-card">
+        <div class="qa-trainee-identity">
+          <span class="qa-trainee-number">{{ forloop.counter }}</span>
+          <div>
+            <h3>{{ attendance.farmer.full_name }}</h3>
+            <a href="tel:{{ attendance.farmer.phone }}">{{ attendance.farmer.phone }}</a>
+            <span class="qa-trainee-location">{{ attendance.farmer.location|default:attendance.farmer.county }}</span>
+          </div>
+        </div>
+        <div class="qa-trainee-attendance">
+          <span class="qa-card-label">Call confirmation</span>
+          <span class="badge {% if attendance.status == 'confirmed' %}badge-ok{% elif attendance.status == 'not_attended' %}badge-bad{% else %}badge-muted{% endif %}">{{ attendance.get_status_display }}</span>
+        </div>
+        <div class="qa-trainee-current">
+          <span class="qa-card-label">QA decision</span>
+          <span class="badge {% if attendance.review_status == 'approved' %}badge-ok{% elif attendance.review_status == 'rejected' %}badge-bad{% else %}badge-warn{% endif %}">{{ attendance.get_review_status_display }}</span>
+          {% if attendance.review_reason %}<p>{{ attendance.review_reason }}</p>{% endif %}
+          {% if attendance.reviewed_by %}<span class="qa-review-by">By {{ attendance.reviewed_by.display_name }} · {{ attendance.reviewed_at|date:"j M Y, g:i A" }}</span>{% endif %}
+        </div>
+        <form method="post" action="{% url 'qa:review_trainee' attendance.pk %}" class="qa-trainee-decision">
+          {% csrf_token %}
+          <fieldset class="qa-decision-options">
+            <legend>Decision</legend>
+            <label class="qa-decision-option"><input type="radio" name="decision" value="approved" required {% if attendance.review_status == 'approved' %}checked{% endif %}> Approve</label>
+            <label class="qa-decision-option is-reject"><input type="radio" name="decision" value="rejected" required {% if attendance.review_status == 'rejected' %}checked{% endif %}> Reject</label>
+          </fieldset>
+          <label class="qa-reason-label" for="trainee-reason-{{ attendance.pk }}">Reason <span aria-hidden="true">*</span></label>
+          <textarea class="input" id="trainee-reason-{{ attendance.pk }}" name="reason" rows="2" maxlength="1000" required placeholder="Reason for this decision">{% if attendance.review_status != 'pending' %}{{ attendance.review_reason }}{% endif %}</textarea>
+          <button class="btn btn-sm" type="submit">Save trainee decision</button>
+        </form>
+      </article>
+    {% empty %}
+      <div class="qa-review-empty">
+        <h3>No trainees registered for this training</h3>
+        <p>There are no individual records to approve or reject.</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

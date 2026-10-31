@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Farmers · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container head-row">
+  <div><h1>Farmers</h1><p>Everyone who has been registered at a Digicow training.</p></div>
+  {% if user.is_coordinator or user.is_trainer %}<a class="btn" href="{% url 'training:farmer_create' %}">Add farmer</a>{% endif %}
+</div></div>
+{% endblock %}
+{% block content %}
+<form class="filters" method="get">
+  <div><label for="q">Search</label><input class="input" id="q" name="q" value="{{ q }}" placeholder="Name, phone or village"></div>
+  <div><label for="county">County</label>
+    <select class="input" id="county" name="county">
+      <option value="">All</option>
+      {% for c in counties %}<option value="{{ c.pk }}" {% if c.pk|stringformat:"s" == selected_county %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select></div>
+  <button class="btn btn-sm" type="submit">Search</button>
+</form>
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Name</th><th>Phone</th><th>County</th><th>Village / ward</th><th>Farms</th><th class="num">Trainings</th>{% if user.is_coordinator %}<th></th>{% endif %}</tr></thead>
+    <tbody>
+      {% for f in farmers %}
+        <tr>
+          <td><strong>{{ f.full_name }}</strong></td>
+          <td><a href="tel:{{ f.phone }}">{{ f.phone }}</a></td>
+          <td>{{ f.county }}</td>
+          <td>{{ f.location|default:"-" }}</td>
+          <td>{{ f.farm_focus|default:"-" }}</td>
+          <td class="num">{{ f.sessions_attended }}</td>
+          {% if user.is_coordinator %}<td class="right"><a class="btn btn-outline btn-sm" href="{% url 'training:farmer_edit' f.pk %}">Edit</a></td>{% endif %}
+        </tr>
+      {% empty %}<tr><td colspan="7" class="empty">No farmers found.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/pagination.html" %}
+{% endblock %}

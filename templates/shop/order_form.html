@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}New order · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container"><h1>New order</h1><p>Record the farm products a farmer wants. A coordinator will approve it.</p></div></div>
+{% endblock %}
+{% block content %}
+<form method="post" novalidate>
+  {% csrf_token %}
+  <div class="grid cols-2">
+    <div class="card">
+      <h3>Farmer</h3>
+      {% include "partials/form_fields.html" %}
+      <p class="small muted">Farmer not on the list? <a href="{% url 'training:farmer_create' %}">Add them first</a>.</p>
+    </div>
+    <div class="card">
+      <h3>Products</h3>
+      {{ formset.management_form }}
+      {% if formset.non_form_errors %}<div class="alert alert-error">{% for e in formset.non_form_errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>{% endif %}
+      <table class="order-lines" style="width:100%">
+        <thead><tr><th class="small muted" style="text-align:left">Product</th><th class="small muted" style="text-align:left;width:90px">Qty</th></tr></thead>
+        <tbody>
+          {% for line in formset %}
+            <tr>
+              <td>{% for hidden in line.hidden_fields %}{{ hidden }}{% endfor %}{{ line.product }}{% for e in line.product.errors %}<p class="error">{{ e }}</p>{% endfor %}</td>
+              <td>{{ line.quantity }}{% for e in line.quantity.errors %}<p class="error">{{ e }}</p>{% endfor %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="help">Leave unused lines empty. Prices are fixed when you save the order.</p>
+    </div>
+  </div>
+  <div class="btn-row" style="margin-top:1.2rem">
+    <button class="btn" type="submit">Submit order</button>
+    <a class="btn btn-outline" href="{% url 'shop:order_list' %}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

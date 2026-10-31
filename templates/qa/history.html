@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Call history · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container">
+  <h1>Q&amp;A call history</h1>
+  <p>Every confirmation call, with the farmer feedback and questions collected.</p>
+</div></div>
+{% endblock %}
+{% block content %}
+<form class="qa-table-toolbar" method="get">
+  <div class="filters">
+  <div><label for="outcome">Outcome</label>
+    <select class="input" id="outcome" name="outcome">
+      <option value="">All</option>
+      {% for value, label in outcomes %}<option value="{{ value }}" {% if value == selected_outcome %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select></div>
+  <div class="field-inline" style="padding-bottom:.5rem">
+    <input type="checkbox" id="questions" name="questions" value="1" {% if only_questions %}checked{% endif %}>
+    <label for="questions">Only calls with a question</label>
+  </div>
+  </div>
+  <label class="qa-search">Search history
+    <input class="input" type="search" name="q" value="{{ search_query }}" placeholder="Farmer, phone, feedback…" aria-label="Search call history">
+  </label>
+  <button class="btn btn-sm" type="submit">Apply filters</button>
+</form>
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>When</th><th>Farmer</th><th>Training</th><th>Outcome</th><th>Rating</th><th>Feedback and questions</th><th>Agent</th></tr></thead>
+    <tbody>
+      {% for c in calls %}
+        <tr>
+          <td>{{ c.called_at|date:"j M Y" }}<br><span class="muted small">{{ c.called_at|date:"g:i A" }}</span></td>
+          <td><strong>{{ c.attendance.farmer.full_name }}</strong><br><span class="muted small">{{ c.attendance.farmer.phone }}</span></td>
+          <td>{{ c.attendance.session.topic.title }}<br><span class="muted small">{{ c.attendance.session.county }} · {{ c.attendance.session.date|date:"j M" }}</span></td>
+          <td><span class="badge {% if c.outcome == 'confirmed' %}badge-ok{% elif c.outcome == 'not_attended' %}badge-bad{% else %}badge-muted{% endif %}">{{ c.get_outcome_display }}</span></td>
+          <td>{% if c.rating %}{{ c.rating }}/5{% else %}-{% endif %}</td>
+          <td>
+            {% if c.feedback %}<div><span class="muted small">Feedback:</span> {{ c.feedback }}</div>{% endif %}
+            {% if c.farmer_question %}<div><span class="muted small">Question:</span> <strong>{{ c.farmer_question }}</strong></div>{% endif %}
+            {% if not c.feedback and not c.farmer_question %}-{% endif %}
+          </td>
+          <td>{{ c.agent.display_name|default:"-" }}</td>
+        </tr>
+      {% empty %}<tr><td colspan="7" class="empty">No calls match.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/pagination.html" %}
+{% endblock %}

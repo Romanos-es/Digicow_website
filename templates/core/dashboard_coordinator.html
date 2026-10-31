@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container head-row">
+  <div><h1>Welcome, {{ user.display_name }}</h1><p>Training, follow-up and orders at a glance.</p></div>
+  <div class="btn-row">
+    <a class="btn" href="{% url 'training:session_create' %}">Schedule a training</a>
+    <a class="btn btn-outline" href="{% url 'training:topic_create' %}">Add a topic</a>
+  </div>
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="grid cols-4">
+  <div class="card stat"><div class="num">{{ sessions_this_month }}</div><div class="label">Sessions this month</div></div>
+  <div class="card stat"><div class="num">{{ farmer_count }}</div><div class="label">Farmers on the system</div></div>
+  <div class="card stat {% if queue_count %}hot{% endif %}"><div class="num">{{ queue_count }}</div><div class="label">Farmers awaiting a Q&amp;A call</div></div>
+  <div class="card stat {% if pending_order_count %}hot{% endif %}"><div class="num">{{ pending_order_count }}</div><div class="label">Orders to approve</div></div>
+</div>
+<p class="muted small" style="margin-top:.8rem">
+  {% if confirm_rate is not None %}{{ confirm_rate }}% of farmers reached by phone confirmed they attended.{% else %}No confirmation calls have been completed yet.{% endif %}
+</p>
+
+<div class="grid cols-2" style="margin-top:1rem">
+  <div class="card">
+    <div class="card-head"><h3>Upcoming sessions</h3><a class="btn btn-outline btn-sm" href="{% url 'training:session_list' %}">All sessions</a></div>
+    {% for s in upcoming %}
+      <p><a href="{% url 'training:session_detail' s.pk %}"><strong>{{ s.topic.title }}</strong></a><br>
+      <span class="muted small">{{ s.date|date:"D j M" }} · {{ s.county }} · {{ s.trainer.display_name|default:"No trainer" }}</span></p>
+    {% empty %}<p class="muted">Nothing scheduled.</p>{% endfor %}
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Orders waiting for approval</h3><a class="btn btn-outline btn-sm" href="{% url 'shop:order_list' %}?status=pending">View</a></div>
+    {% for o in pending_orders %}
+      <p><a href="{% url 'shop:order_detail' o.pk %}"><strong>{{ o.reference }}</strong></a> · {{ o.farmer.full_name }}<br>
+      <span class="muted small">KES {{ o.total|floatformat:"0g" }} · by {{ o.trainer.display_name|default:"unknown" }}</span></p>
+    {% empty %}<p class="muted">No pending orders.</p>{% endfor %}
+  </div>
+</div>
+
+<div class="card" style="margin-top:1rem">
+  <div class="card-head"><h3>Latest farmer questions</h3><a class="btn btn-outline btn-sm" href="{% url 'qa:history' %}?questions=1">All questions</a></div>
+  {% for call in recent_questions %}
+    <p><strong>{{ call.attendance.farmer.full_name }}</strong> <span class="muted small">on {{ call.attendance.session.topic.title }}</span><br>{{ call.farmer_question }}</p>
+  {% empty %}<p class="muted">No questions collected yet.</p>{% endfor %}
+</div>
+{% endblock %}

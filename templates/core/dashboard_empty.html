@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Digicow{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <h1>Welcome, {{ user.display_name }}</h1>
+  <p>Your account does not have a role yet. Please ask an administrator to assign one.</p>
+</div>
+{% endblock %}

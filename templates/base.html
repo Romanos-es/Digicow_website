@@ -1,0 +1,152 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Digicow{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/digicow.css' %}">
+</head>
+<body{% if user.is_authenticated and user.is_qa %} class="qa-portal-body"{% endif %}>
+  {% if user.is_authenticated and user.is_qa %}
+    <header class="qa-topbar">
+      <a class="qa-brand" href="{% url 'core:dashboard' %}">
+        <span class="qa-brand-mark" aria-hidden="true">D</span>
+        <span>Digicow<span class="qa-brand-subtitle">Farmer support</span></span>
+      </a>
+      <button class="qa-menu-toggle" type="button" aria-label="Toggle navigation" aria-controls="qaSidebar" aria-expanded="false" data-sidebar-toggle>&#9776;</button>
+      <div class="qa-account">
+        <span class="qa-account-avatar" aria-hidden="true">{{ user.display_name|first|upper }}</span>
+        <a href="{% url 'accounts:password_change' %}">{{ user.display_name }}</a>
+        <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+          {% csrf_token %}<button type="submit" class="qa-logout">Log out</button>
+        </form>
+      </div>
+    </header>
+  {% else %}
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a class="brand" href="{% url 'core:home' %}">
+          <span class="brand-mark">D</span><span class="brand-name">Digicow</span>
+        </a>
+        <button class="nav-toggle" type="button" aria-label="Open menu" data-nav-toggle>&#9776;</button>
+        <nav class="nav" id="nav">
+          {% if user.is_authenticated %}
+            <a href="{% url 'core:dashboard' %}">Dashboard</a>
+            {% if user.is_coordinator %}
+              <a href="{% url 'training:session_list' %}">Sessions</a>
+              <a href="{% url 'training:topic_list' %}">Topics</a>
+              <a href="{% url 'training:farmer_list' %}">Farmers</a>
+              <a href="{% url 'shop:order_list' %}">Orders</a>
+              <a href="{% url 'qa:history' %}">Q&amp;A calls</a>
+              <a href="{% url 'core:reports' %}">Reports</a>
+              <a href="{% url 'accounts:staff_list' %}">Staff</a>
+            {% elif user.is_trainer %}
+              <a href="{% url 'training:session_list' %}">My sessions</a>
+              <a href="{% url 'training:farmer_list' %}">Farmers</a>
+              <a href="{% url 'shop:order_list' %}">My orders</a>
+              <a class="active" href="{% url 'shop:order_create' %}">New order</a>
+            {% elif user.is_farmer %}
+              <a href="{% url 'core:trainings' %}">Upcoming trainings</a>
+              <a href="{% url 'core:submit_review' %}">Write a review</a>
+              <a href="{% url 'core:about' %}">About Digicow</a>
+            {% endif %}
+            <a href="{% url 'accounts:password_change' %}">{{ user.display_name }}</a>
+            <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+              {% csrf_token %}<button type="submit" class="linklike">Log out</button>
+            </form>
+          {% else %}
+            <a href="{% url 'core:home' %}">Home</a>
+            <a href="{% url 'core:about' %}">About</a>
+            <a href="{% url 'core:products' %}">Products</a>
+            <a href="{% url 'core:trainings' %}">Trainings</a>
+            <a href="{% url 'core:contact' %}">Contact</a>
+            <a href="{% url 'accounts:farmer_signup' %}">Join as a farmer</a>
+            <a class="active" href="{% url 'accounts:login' %}">Staff login</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+  {% endif %}
+  {% if user.is_authenticated and user.is_qa %}
+    <div class="qa-workspace">
+      <aside class="qa-sidebar" id="qaSidebar">
+        <p class="qa-sidebar-label">Workspace</p>
+        <nav class="qa-sidebar-nav" aria-label="QA navigation">
+          <a class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'core:dashboard' %}">
+            <span class="qa-nav-icon" aria-hidden="true">⌂</span>Overview
+          </a>
+          <p class="qa-sidebar-label qa-sidebar-section">Training review</p>
+          <a class="{% if request.resolver_match.url_name == 'training_list' or request.resolver_match.url_name == 'training_review' or request.resolver_match.url_name == 'review_training_group' or request.resolver_match.url_name == 'review_trainee' %}active{% endif %}" href="{% url 'qa:training_list' %}">
+            <span class="qa-nav-icon" aria-hidden="true">▣</span>Trainer trainings
+          </a>
+          <p class="qa-sidebar-label qa-sidebar-section">Call management</p>
+          <a class="{% if request.resolver_match.url_name == 'queue' or request.resolver_match.url_name == 'call' %}active{% endif %}" href="{% url 'qa:queue' %}">
+            <span class="qa-nav-icon" aria-hidden="true">◷</span>Call queue
+          </a>
+          <a class="{% if request.resolver_match.url_name == 'history' %}active{% endif %}" href="{% url 'qa:history' %}">
+            <span class="qa-nav-icon" aria-hidden="true">↻</span>Call history
+          </a>
+          <p class="qa-sidebar-label qa-sidebar-section">Directory</p>
+          <a class="{% if request.resolver_match.namespace == 'training' and request.resolver_match.url_name == 'farmer_list' %}active{% endif %}" href="{% url 'training:farmer_list' %}">
+            <span class="qa-nav-icon" aria-hidden="true">♙</span>Farmers
+          </a>
+        </nav>
+        <div class="qa-sidebar-help">
+          <strong>Need a hand?</strong>
+          <span>Use the call history to follow up on farmer questions.</span>
+          <a href="{% url 'qa:history' %}">View call history <span aria-hidden="true">→</span></a>
+        </div>
+      </aside>
+      <div class="qa-main-column">
+  {% else %}
+    <div class="standard-page">
+  {% endif %}
+  {% if messages %}
+    <div class="{% if user.is_authenticated and user.is_qa %}qa-message-wrap{% else %}container{% endif %}">
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% endif %}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+  <main{% if user.is_authenticated and user.is_qa %} class="qa-main"{% endif %}>
+    {% block body %}
+      {% block page_head %}{% endblock %}
+      <div class="container content">{% block content %}{% endblock %}</div>
+    {% endblock %}
+  </main>
+  {% if user.is_authenticated and user.is_qa %}
+        <footer class="qa-footer">&copy; {% now "Y" %} Digicow <span>·</span> Farmer training and support across Kenya</footer>
+  {% else %}
+    <footer class="footer">
+      <div class="container footer-inner">
+        <div>
+          <h4>Digicow</h4>
+          <p class="small">Farmer training, follow-up and farm product orders across Kenya.</p>
+        </div>
+        <div>
+          <h4>Our brands</h4>
+          <ul>
+            {% for brand in footer_brands %}<li>{{ brand.name }}</li>{% empty %}<li>&nbsp;</li>{% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="{% url 'core:products' %}">Products</a></li>
+            <li><a href="{% url 'core:trainings' %}">Upcoming trainings</a></li>
+            <li><a href="{% url 'core:contact' %}">Contact us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-base">&copy; {% now "Y" %} Digicow. All rights reserved.</div>
+    </footer>
+  {% endif %}
+  {% if user.is_authenticated and user.is_qa %}</div></div>{% else %}</div>{% endif %}
+  <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

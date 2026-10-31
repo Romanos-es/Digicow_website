@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}My farmer account · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container">
+  <span class="qa-page-kicker">Farmer community</span>
+  <h1>Welcome, {{ user.display_name }}</h1>
+  <p>Your Digicow account and training updates.</p>
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="grid cols-2">
+  <section class="card">
+    <h2>My details</h2>
+    {% if farmer %}
+      <dl class="details">
+        <dt>Phone</dt><dd>{{ farmer.phone }}</dd>
+        <dt>County</dt><dd>{{ farmer.county }}</dd>
+      </dl>
+    {% else %}
+      <p class="muted">Your farmer profile is not linked yet. Contact Digicow if you need help connecting previous training records.</p>
+    {% endif %}
+    <p style="margin-top:1rem"><a class="btn btn-outline btn-sm" href="{% url 'accounts:password_change' %}">Change password</a></p>
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>Upcoming trainings</h2><a href="{% url 'core:trainings' %}">All sessions</a></div>
+    {% for session in upcoming %}
+      <p><strong>{{ session.topic.title }}</strong><br>
+      <span class="muted small">{{ session.date|date:"j M Y" }} · {{ session.county }} · {{ session.venue }}</span></p>
+    {% empty %}
+      <p class="muted">There are no upcoming trainings in your county at the moment.</p>
+    {% endfor %}
+  </section>
+</div>
+
+<section class="card farmer-training-history">
+  <div class="card-head"><h2>My training history</h2></div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Date</th><th>Training</th><th>Location</th><th>Attendance follow-up</th><th>QA review</th></tr></thead>
+      <tbody>
+        {% for attendance in attendances %}
+          <tr>
+            <td>{{ attendance.session.date|date:"j M Y" }}</td>
+            <td>{{ attendance.session.topic.title }}</td>
+            <td>{{ attendance.session.county }}</td>
+            <td>{{ attendance.get_status_display }}</td>
+            <td>{{ attendance.get_review_status_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="empty">Your training history will appear here after you attend a Digicow session.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

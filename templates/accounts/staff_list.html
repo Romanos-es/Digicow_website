@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Staff · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container head-row">
+  <div><h1>Staff</h1><p>Trainers, Q&amp;A agents and coordinators.</p></div>
+  <a class="btn" href="{% url 'accounts:staff_create' %}">Add staff member</a>
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Phone</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for person in staff %}
+        <tr>
+          <td><strong>{{ person.display_name }}</strong></td>
+          <td>{{ person.username }}</td>
+          <td>{{ person.get_role_display }}</td>
+          <td>{{ person.phone|default:"-" }}</td>
+          <td>{% if person.is_active %}<span class="badge badge-ok">Active</span>{% else %}<span class="badge badge-muted">Inactive</span>{% endif %}</td>
+          <td class="right">
+            {% if person != user %}
+              <form method="post" action="{% url 'accounts:staff_toggle' person.pk %}" class="inline">
+                {% csrf_token %}
+                <button class="btn btn-outline btn-sm" type="submit" data-confirm="{% if person.is_active %}Deactivate{% else %}Activate{% endif %} {{ person.display_name }}?">{% if person.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

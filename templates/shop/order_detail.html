@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ order.reference }} · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container head-row">
+  <div><h1>Order {{ order.reference }}</h1><p>Taken {{ order.created_at|date:"j F Y, g:i A" }}</p></div>
+  <span class="badge {% if order.status == 'delivered' %}badge-ok{% elif order.status == 'cancelled' %}badge-muted{% elif order.status == 'pending' %}badge-warn{% endif %}" style="font-size:1rem">{{ order.get_status_display }}</span>
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="grid cols-2">
+  <div class="card">
+    <h3>Order details</h3>
+    <dl class="details">
+      <dt>Farmer</dt><dd>{{ order.farmer.full_name }}</dd>
+      <dt>Phone</dt><dd><a href="tel:{{ order.farmer.phone }}">{{ order.farmer.phone }}</a></dd>
+      <dt>Trainer</dt><dd>{{ order.trainer.display_name|default:"-" }}</dd>
+      <dt>Delivery</dt><dd>{{ order.delivery_location|default:"-" }}</dd>
+      <dt>Session</dt><dd>{% if order.session %}<a href="{% url 'training:session_detail' order.session.pk %}">{{ order.session.topic.title }}</a>{% else %}-{% endif %}</dd>
+    </dl>
+    {% if order.notes %}<p style="margin-top:1rem"><strong>Notes</strong><br>{{ order.notes|linebreaksbr }}</p>{% endif %}
+  </div>
+  <div class="card">
+    <h3>Next step</h3>
+    {% if actions %}
+      <div class="btn-row">
+        {% for value, label in actions %}
+          <form method="post" action="{% url 'shop:order_status' order.pk value %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="btn {% if value == 'cancelled' %}btn-danger{% endif %}" {% if value == 'cancelled' %}data-confirm="Cancel this order?"{% endif %}>
+              {% if value == 'approved' %}Approve order{% elif value == 'delivered' %}Mark delivered{% elif value == 'cancelled' %}Cancel order{% else %}{{ label }}{% endif %}
+            </button>
+          </form>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">No further action is needed on this order.</p>
+    {% endif %}
+  </div>
+</div>
+
+<h2 style="margin-top:2rem">Items</h2>
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Brand</th><th>Product</th><th>Pack size</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Total (KES)</th></tr></thead>
+    <tbody>
+      {% for item in order.items.all %}
+        <tr>
+          <td>{{ item.product.brand.name }}</td><td>{{ item.product.name }}</td><td>{{ item.product.unit }}</td>
+          <td class="num">{{ item.quantity }}</td><td class="num">{{ item.unit_price|floatformat:"0g" }}</td><td class="num">{{ item.line_total|floatformat:"0g" }}</td>
+        </tr>
+      {% endfor %}
+      <tr><td colspan="5" class="right"><strong>Order total</strong></td><td class="num"><strong>KES {{ order.total|floatformat:"0g" }}</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+<p style="margin-top:1rem"><a class="btn btn-outline" href="{% url 'shop:order_list' %}">Back to orders</a></p>
+{% endblock %}

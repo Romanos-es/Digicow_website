@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container head-row">
+  <div><h1>Welcome, {{ user.display_name }}</h1><p>Confirm attendance and collect farmer feedback.</p></div>
+  <a class="btn" href="{% url 'qa:queue' %}">Open call queue</a>
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="grid cols-3">
+  <div class="card stat {% if queue_count %}hot{% endif %}"><div class="num">{{ queue_count }}</div><div class="label">Farmers waiting for a call</div></div>
+  <div class="card stat"><div class="num">{{ calls_today }}</div><div class="label">Calls you logged today</div></div>
+  <div class="card stat"><div class="num">{{ confirmed_today }}</div><div class="label">Attendance confirmed today</div></div>
+</div>
+<div class="grid cols-2" style="margin-top:1rem">
+  <div class="card">
+    <div class="card-head"><h3>Next up</h3></div>
+    {% for a in next_up %}
+      <p><strong>{{ a.farmer.full_name }}</strong> · <a href="tel:{{ a.farmer.phone }}">{{ a.farmer.phone }}</a><br>
+      <span class="muted small">{{ a.session.topic.title }} · {{ a.session.county }} · {{ a.session.date|date:"j M" }}</span>
+      <a class="btn btn-sm" href="{% url 'qa:call' a.pk %}">Log call</a></p>
+    {% empty %}<p class="muted">The queue is clear. Nice work.</p>{% endfor %}
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Your recent calls</h3><a class="btn btn-outline btn-sm" href="{% url 'qa:history' %}">History</a></div>
+    {% for c in recent_calls %}
+      <p><strong>{{ c.attendance.farmer.full_name }}</strong> <span class="badge">{{ c.get_outcome_display }}</span><br>
+      <span class="muted small">{{ c.called_at|date:"j M, g:i A" }}</span></p>
+    {% empty %}<p class="muted">No calls logged yet.</p>{% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit session{% else %}Schedule a training{% endif %} · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container"><h1>{% if object %}Edit session{% else %}Schedule a training{% endif %}</h1><p>Choose a topic, a county and the trainer who will go.</p></div></div>
+{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/form_fields.html" %}
+    <div class="btn-row">
+      <button class="btn" type="submit">Save session</button>
+      <a class="btn btn-outline" href="{% url 'training:session_list' %}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

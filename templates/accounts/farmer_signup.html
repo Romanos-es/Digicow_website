@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Join Digicow · Digicow{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card accent auth-card">
+    <span class="qa-page-kicker">Farmer community</span>
+    <h1>Create your farmer account</h1>
+    <p class="muted">Keep your Digicow training information together and stay connected with upcoming sessions.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <button class="btn" type="submit" style="width:100%">Create account</button>
+    </form>
+    <p class="farmer-auth-switch">Already have an account? <a href="{% url 'accounts:farmer_login' %}">Sign in</a>.</p>
+    <p class="muted small">If your phone number is already on a training record, contact the Digicow team so we can verify and connect it safely.</p>
+  </div>
+</div>
+{% endblock %}

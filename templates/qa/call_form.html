@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Log call · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container"><h1>Log a call</h1><p>Phone the farmer, then record what happened.</p></div></div>
+{% endblock %}
+{% block content %}
+<div class="grid cols-2">
+  <div class="card accent">
+    <h3>{{ attendance.farmer.full_name }}</h3>
+    <dl class="details">
+      <dt>Phone</dt><dd><a class="btn btn-sm" href="tel:{{ attendance.farmer.phone }}">Call {{ attendance.farmer.phone }}</a></dd>
+      <dt>Location</dt><dd>{{ attendance.farmer.location|default:"-" }}, {{ attendance.farmer.county }}</dd>
+      <dt>Training</dt><dd>{{ attendance.session.topic.title }}</dd>
+      <dt>Held</dt><dd>{{ attendance.session.date|date:"l j F Y" }} in {{ attendance.session.county }}</dd>
+      <dt>Venue</dt><dd>{{ attendance.session.venue }}</dd>
+      <dt>Trainer</dt><dd>{{ attendance.session.trainer.display_name|default:"-" }}</dd>
+    </dl>
+    {% if previous_calls %}
+      <h3 style="margin-top:1.2rem">Earlier attempts</h3>
+      {% for c in previous_calls %}
+        <p class="small"><span class="badge badge-muted">{{ c.get_outcome_display }}</span> {{ c.called_at|date:"j M, g:i A" }} by {{ c.agent.display_name|default:"unknown" }}</p>
+      {% endfor %}
+    {% endif %}
+    <p class="muted small" style="margin-top:1rem">Ask: "Did you attend the {{ attendance.session.topic.title }} training on {{ attendance.session.date|date:"j F" }}?"</p>
+  </div>
+
+  <div class="card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <p class="muted small">Rating, feedback and questions are only saved when you choose "Confirmed".</p>
+      <div class="btn-row">
+        <button class="btn" type="submit">Save call</button>
+        <a class="btn btn-outline" href="{% url 'qa:queue' %}">Back to queue</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

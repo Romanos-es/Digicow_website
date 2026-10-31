@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ session.topic.title }} · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container head-row">
+  <div>
+    <h1>{{ session.topic.title }}</h1>
+    <p>{{ session.county }} County · {{ session.date|date:"l j F Y" }}, {{ session.start_time|time:"g:i A" }}</p>
+  </div>
+  <div class="btn-row">
+    {% if session.status != 'cancelled' %}<a class="btn" href="{% url 'training:attendance' session.pk %}">Register attendance</a>{% endif %}
+    {% if session.status == 'scheduled' %}
+      <form method="post" action="{% url 'training:session_complete' session.pk %}" class="inline">
+        {% csrf_token %}<button class="btn btn-outline" type="submit" data-confirm="Mark this session as completed?">Mark completed</button>
+      </form>
+    {% endif %}
+    {% if user.is_coordinator %}<a class="btn btn-outline" href="{% url 'training:session_edit' session.pk %}">Edit</a>{% endif %}
+  </div>
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="grid cols-2">
+  <div class="card">
+    <h3>Session details</h3>
+    <dl class="details">
+      <dt>Status</dt><dd><span class="badge {% if session.status == 'completed' %}badge-ok{% elif session.status == 'cancelled' %}badge-muted{% else %}badge-warn{% endif %}">{{ session.get_status_display }}</span></dd>
+      <dt>Venue</dt><dd>{{ session.venue }}</dd>
+      <dt>Trainer</dt><dd>{{ session.trainer.display_name|default:"Not assigned" }}</dd>
+    </dl>
+    {% if session.notes %}<p style="margin-top:1rem"><strong>Notes</strong><br>{{ session.notes|linebreaksbr }}</p>{% endif %}
+  </div>
+  <div class="card">
+    <h3>What to cover</h3>
+    <p>{{ session.topic.summary|default:"No outline was added for this topic."|linebreaksbr }}</p>
+  </div>
+</div>
+
+<div class="grid cols-4" style="margin-top:1rem">
+  <div class="card stat"><div class="num">{{ status_counts.total }}</div><div class="label">Registered</div></div>
+  <div class="card stat"><div class="num">{{ status_counts.confirmed }}</div><div class="label">Confirmed by phone</div></div>
+  <div class="card stat"><div class="num">{{ status_counts.not_attended }}</div><div class="label">Said they did not attend</div></div>
+  <div class="card stat"><div class="num">{{ status_counts.awaiting }}</div><div class="label">Awaiting a call</div></div>
+</div>
+
+<h2 style="margin-top:2rem">Farmers registered</h2>
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Farmer</th><th>Phone</th><th>Location</th><th>Phone confirmation</th></tr></thead>
+    <tbody>
+      {% for a in attendances %}
+        <tr>
+          <td><strong>{{ a.farmer.full_name }}</strong></td>
+          <td>{{ a.farmer.phone }}</td>
+          <td>{{ a.farmer.location|default:"-" }}</td>
+          <td><span class="badge {% if a.status == 'confirmed' %}badge-ok{% elif a.status == 'not_attended' %}badge-bad{% elif a.status == 'unreachable' %}badge-muted{% else %}badge-warn{% endif %}">{{ a.get_status_display }}</span></td>
+        </tr>
+      {% empty %}<tr><td colspan="4" class="empty">No farmers registered yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

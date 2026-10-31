@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Sessions · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container head-row">
+  <div><h1>{% if user.is_coordinator %}Training sessions{% else %}My sessions{% endif %}</h1><p>Where trainers are going and what they are teaching.</p></div>
+  {% if user.is_coordinator %}<a class="btn" href="{% url 'training:session_create' %}">Schedule a training</a>{% endif %}
+</div></div>
+{% endblock %}
+{% block content %}
+<form class="filters" method="get">
+  <div><label for="status">Status</label>
+    <select class="input" id="status" name="status">
+      <option value="">All</option>
+      {% for value, label in statuses %}<option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select></div>
+  <div><label for="county">County</label>
+    <select class="input" id="county" name="county">
+      <option value="">All</option>
+      {% for c in counties %}<option value="{{ c.pk }}" {% if c.pk|stringformat:"s" == selected_county %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select></div>
+  <button class="btn btn-sm" type="submit">Filter</button>
+</form>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Date</th><th>Topic</th><th>County / venue</th>{% if user.is_coordinator %}<th>Trainer</th>{% endif %}<th class="num">Farmers</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for s in sessions %}
+        <tr>
+          <td><strong>{{ s.date|date:"D j M Y" }}</strong><br><span class="muted small">{{ s.start_time|time:"g:i A" }}</span></td>
+          <td>{{ s.topic.title }}</td>
+          <td>{{ s.county }}<br><span class="muted small">{{ s.venue }}</span></td>
+          {% if user.is_coordinator %}<td>{{ s.trainer.display_name|default:"-" }}</td>{% endif %}
+          <td class="num">{{ s.attendee_count }}</td>
+          <td><span class="badge {% if s.status == 'completed' %}badge-ok{% elif s.status == 'cancelled' %}badge-muted{% else %}badge-warn{% endif %}">{{ s.get_status_display }}</span></td>
+          <td class="right"><a class="btn btn-outline btn-sm" href="{% url 'training:session_detail' s.pk %}">Open</a></td>
+        </tr>
+      {% empty %}<tr><td colspan="7" class="empty">No sessions found.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/pagination.html" %}
+{% endblock %}

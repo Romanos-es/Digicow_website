@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Trainer trainings · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container">
+  <span class="qa-page-kicker">Quality assurance</span>
+  <h1>Trainer trainings</h1>
+  <p>Review completed trainings, their group photos, and each registered trainee.</p>
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="qa-review-intro">
+  <div>
+    <h2>Completed trainings</h2>
+    <p>Trainings are grouped by trainer. Open a training to review individual trainees or make a group decision.</p>
+  </div>
+</div>
+{% for group in trainer_groups %}
+  <section class="qa-trainer-group">
+    <header class="qa-trainer-heading">
+      <div>
+        <span class="qa-card-label">Trainer</span>
+        <h2>{{ group.trainer.display_name|default:"Trainer not assigned" }}</h2>
+      </div>
+      <span class="qa-trainer-session-count">{{ group.sessions|length }} training{{ group.sessions|length|pluralize }}</span>
+    </header>
+    <div class="qa-training-grid">
+      {% for session in group.sessions %}
+        <article class="qa-training-card">
+          {% if session.group_photo %}
+            <a class="qa-training-image" href="{% url 'qa:training_review' session.pk %}" aria-label="Review {{ session.topic.title }}">
+              <img src="{% url 'qa:training_photo' session.pk %}" alt="Training group at {{ session.topic.title }}">
+            </a>
+          {% else %}
+            <div class="qa-training-image qa-training-image-empty" aria-label="No group photo uploaded">
+              <span aria-hidden="true">▧</span><span>No group photo yet</span>
+            </div>
+          {% endif %}
+          <div class="qa-training-card-body">
+            <div class="qa-training-card-title">
+              <div>
+                <span class="qa-card-label">Training</span>
+                <h3>{{ session.topic.title }}</h3>
+              </div>
+              <span class="badge {% if session.pending_count %}badge-warn{% else %}badge-ok{% endif %}">
+                {% if not session.attendee_count %}No trainees{% elif session.pending_count %}{{ session.pending_count }} pending{% else %}Reviewed{% endif %}
+              </span>
+            </div>
+            <p class="qa-training-location">{{ session.county }} · {{ session.venue }}</p>
+            <p class="qa-training-date">{{ session.date|date:"j M Y" }} · {{ session.attendee_count }} trainee{{ session.attendee_count|pluralize }}</p>
+            <div class="qa-training-counts" aria-label="Review totals">
+              <span><strong>{{ session.approved_count }}</strong> approved</span>
+              <span><strong>{{ session.rejected_count }}</strong> rejected</span>
+            </div>
+            <a class="btn btn-sm" href="{% url 'qa:training_review' session.pk %}">Review training</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% empty %}
+  <div class="qa-review-empty">
+    <span class="qa-queue-empty-icon" aria-hidden="true">✓</span>
+    <h2>No completed trainings to review</h2>
+    <p>Completed trainings submitted by trainers will appear here, grouped by trainer.</p>
+  </div>
+{% endfor %}
+{% endblock %}

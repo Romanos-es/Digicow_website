@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container head-row">
+  <div><h1>Welcome, {{ user.display_name }}</h1><p>Your trainings and farmer orders.</p></div>
+  <a class="btn" href="{% url 'shop:order_create' %}">New order</a>
+</div></div>
+{% endblock %}
+{% block content %}
+<div class="grid cols-4">
+  <div class="card stat"><div class="num">{{ sessions_done }}</div><div class="label">Sessions completed</div></div>
+  <div class="card stat"><div class="num">{{ farmers_registered }}</div><div class="label">Farmers you registered</div></div>
+  <div class="card stat"><div class="num">{{ order_count }}</div><div class="label">Orders taken</div></div>
+  <div class="card stat"><div class="num">{{ order_value|floatformat:"0g" }}</div><div class="label">Order value (KES)</div></div>
+</div>
+
+{% if due_today %}
+<div class="card accent" style="margin-top:1rem">
+  <h3>Register attendance</h3>
+  <p class="muted small">These sessions have started or passed. Register who attended, then mark them completed.</p>
+  {% for s in due_today %}
+    <p><a href="{% url 'training:session_detail' s.pk %}"><strong>{{ s.topic.title }}</strong></a> · {{ s.county }} · {{ s.date|date:"D j M" }}
+    <a class="btn btn-sm" href="{% url 'training:attendance' s.pk %}">Register attendance</a></p>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="grid cols-2" style="margin-top:1rem">
+  <div class="card">
+    <div class="card-head"><h3>Upcoming sessions</h3><a class="btn btn-outline btn-sm" href="{% url 'training:session_list' %}">All</a></div>
+    {% for s in upcoming %}
+      <p><a href="{% url 'training:session_detail' s.pk %}"><strong>{{ s.topic.title }}</strong></a><br>
+      <span class="muted small">{{ s.date|date:"D j M" }}, {{ s.start_time|time:"g:i A" }} · {{ s.county }} · {{ s.venue }}</span></p>
+    {% empty %}<p class="muted">No upcoming sessions assigned to you.</p>{% endfor %}
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Recent orders</h3><a class="btn btn-outline btn-sm" href="{% url 'shop:order_list' %}">All</a></div>
+    {% for o in recent_orders %}
+      <p><a href="{% url 'shop:order_detail' o.pk %}"><strong>{{ o.reference }}</strong></a> · {{ o.farmer.full_name }}
+      <span class="badge">{{ o.get_status_display }}</span><br>
+      <span class="muted small">KES {{ o.total|floatformat:"0g" }}</span></p>
+    {% empty %}<p class="muted">You have not taken any orders yet.</p>{% endfor %}
+  </div>
+</div>
+{% endblock %}

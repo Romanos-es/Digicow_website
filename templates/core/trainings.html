@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Upcoming trainings · Digicow{% endblock %}
+{% block page_head %}
+<div class="page-head"><div class="container"><h1>Upcoming trainings</h1><p>Free farmer trainings across Kenya. Come with your questions.</p></div></div>
+{% endblock %}
+{% block content %}
+{% if upcoming %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Date</th><th>Time</th><th>Topic</th><th>County</th><th>Venue</th></tr></thead>
+      <tbody>
+        {% for s in upcoming %}
+          <tr>
+            <td><strong>{{ s.date|date:"D j M Y" }}</strong></td>
+            <td>{{ s.start_time|time:"g:i A" }}</td>
+            <td>{{ s.topic.title }}</td>
+            <td>{{ s.county }}</td>
+            <td>{{ s.venue }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="card empty">No trainings are scheduled right now. Please check back soon.</div>
+{% endif %}
+{% endblock %}
