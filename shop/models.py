@@ -20,6 +20,7 @@ class Brand(models.Model):
     name = models.CharField(max_length=60, unique=True)
     slug = models.SlugField(unique=True)
     description = models.TextField(blank=True)
+    website_url = models.URLField(blank=True)
     active = models.BooleanField(default=True)
 
     class Meta:

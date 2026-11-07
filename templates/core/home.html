@@ -60,10 +60,14 @@
 
 <section class="block tinted">
   <div class="container">
-    <div class="card-head"><h2>Our brands</h2><a class="btn btn-outline btn-sm" href="{% url 'core:products' %}">All products</a></div>
+    <div class="card-head"><div><span class="qa-page-kicker">Farm inputs and expertise</span><h2>Brands we work with</h2></div><a class="btn btn-outline btn-sm" href="{% url 'core:products' %}">Explore products</a></div>
     <div class="grid cols-4">
       {% for brand in brands %}
-        <div class="card"><h3>{{ brand.name }}</h3>{% if brand.description %}<p class="muted small">{{ brand.description }}</p>{% endif %}</div>
+        <article class="card">
+          <h3>{{ brand.name }}</h3>
+          {% if brand.description %}<p class="muted small">{{ brand.description }}</p>{% endif %}
+          <a class="btn btn-outline btn-sm" href="{% url 'core:products' %}#{{ brand.slug }}">View brand</a>
+        </article>
       {% empty %}
         <p class="muted">Brands will appear here once they are added.</p>
       {% endfor %}

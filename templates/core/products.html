@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Products · Digicow{% endblock %}
 {% block page_head %}
-<div class="page-head"><div class="container"><h1>Farm products</h1><p>Orders are placed through our trainers during farmer trainings.</p></div></div>
+<div class="page-head"><div class="container"><h1>Farm products</h1><p>Explore agricultural brands and products. Orders are placed through our trainers during farmer trainings.</p></div></div>
 {% endblock %}
 {% block content %}
+<div class="card tinted" style="margin-bottom:2rem">
+  <p class="muted">Product selection and availability can vary. Ask a Digicow trainer to confirm current products, pack sizes and prices before ordering.</p>
+</div>
 {% for brand in brands %}
   <section id="{{ brand.slug }}" style="margin-bottom:2rem">
     <div class="card-head"><h2>{{ brand.name }}</h2></div>
     {% if brand.description %}<p class="muted">{{ brand.description }}</p>{% endif %}
+    {% if brand.website_url %}<p class="small"><a href="{{ brand.website_url }}" target="_blank" rel="noopener noreferrer">Learn more about {{ brand.name }} <span aria-hidden="true">↗</span></a></p>{% endif %}
     {% if brand.live_products %}
       <div class="table-wrap">
         <table class="table">

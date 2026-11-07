@@ -5,7 +5,7 @@ from .models import Brand, Order, OrderItem, Product
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ("name", "active")
+    list_display = ("name", "active", "website_url")
     prepopulated_fields = {"slug": ("name",)}
 
 

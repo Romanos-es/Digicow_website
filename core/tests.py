@@ -34,7 +34,7 @@ class DigicowTestCase(TestCase):
             topic=cls.topic, county=cls.county, trainer=cls.trainer, venue="Hall",
             date=timezone.localdate() - timedelta(days=1),
         )
-        cls.brand = Brand.objects.create(name="Juanco", slug="juanco")
+        cls.brand = Brand.objects.get(name="Juanco")
         cls.product = Product.objects.create(
             brand=cls.brand, name="Feed", unit="50 kg", price=Decimal("2500")
         )
@@ -51,6 +51,10 @@ class PublicAndAccessTests(DigicowTestCase):
             self.assertEqual(self.client.get(reverse(name)).status_code, 200, name)
         self.assertContains(self.client.get(reverse("core:home")), "Hear from our trainees")
         self.assertContains(self.client.get(reverse("core:about")), "Create a farmer account")
+        products = self.client.get(reverse("core:products"))
+        for brand in ("Juanco SPS", "CKL Africa", "Greenlife Crop Protection Africa",
+                      "Asili Granulated Fertilizer", "Learn more about Juanco"):
+            self.assertContains(products, brand)
 
     def test_anonymous_is_sent_to_login(self):
         response = self.client.get(reverse("core:dashboard"))
